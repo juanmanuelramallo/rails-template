@@ -47,13 +47,13 @@ gem_group :test do
   gem 'webdrivers'
 end
 
-# Remove comments frm Gemfile
+# Remove comments and empty groups from Gemfile
 gemfile_contents = File.read('Gemfile')
 File.open('Gemfile', 'w') do |f|
-  f.puts gemfile_contents.split("\n").select { |l| l.strip[0] != '#' }
+  contents = gemfile_contents.split("\n").select { |l| l.strip[0] != '#' }.join("\n")
+  contents.gsub!(/\ngroup (.*) do\nend/, '')
+  f.puts contents.strip
 end
-
-# TODO: Remove empty group blocks from Gemfile. Useful for app:template re-runs.
 
 application "config.log_level = ENV.fetch('RAILS_LOG_LEVEL', 'debug').to_sym"
 environment("config.hosts << ENV.fetch('LOCAL_TUNNEL_HOST', '')", env: 'development')
@@ -165,14 +165,26 @@ file '.env.dist', <<~TXT
   SMTP_SERVER=
 TXT
 
+file 'Procfile', <<~TXT
+  release: bundle exec rails db:migrate
+  web: bundle exec puma -C config/puma.rb
+  workers: bundle exec sidekiq
+TXT
+
+file 'Procfile.dev', <<~TXT
+  web: bundle exec rails server
+  webpack: ./bin/webpack-dev-server
+TXT
+
 run 'bundle install'
 run 'spring stop'
-run 'bundle exec rails generate rspec:install'
-run 'bundle exec rails generate simple_form:install'
-run 'bundle exec rails generate devise:install'
-run 'bundle exec rails generate pundit:install'
-run 'cp $(i18n-tasks gem-path)/templates/config/i18n-tasks.yml config/'
-run 'bundle exec rails db:create db:migrate'
+run 'bundle exec rails generate rspec:install' unless Dir['spec/rails_helper.rb'].any?
+run 'bundle exec rails generate simple_form:install' unless Dir['config/initializers/simple_form.rb'].any?
+run 'bundle exec rails generate devise:install' unless Dir['config/initializers/devise.rb'].any?
+run 'bundle exec rails generate pundit:install' unless Dir['app/policies/application_policy.rb'].any?
+run 'cp $(i18n-tasks gem-path)/templates/config/i18n-tasks.yml config/' unless Dir['config/i18n-tasks.yml'].any?
+run 'bundle exec rails db:create' # TODO: Check if database already exists
+run 'bundle exec rails db:migrate'
 
 prepend_to_file 'spec/rails_helper.rb' do <<~RUBY
   require 'simplecov'
