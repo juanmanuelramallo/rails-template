@@ -104,7 +104,7 @@ file '.github/workflows/ci.yml', <<~YAML
             POSTGRES_USER: postgres
             POSTGRES_DB: postgres
           ports: ["5432:5432"]
-          options: --heath-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+          options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
       steps:
       - uses: actions/checkout@v2
