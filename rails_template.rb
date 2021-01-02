@@ -1,3 +1,19 @@
+def gemfile
+  @gemfile ||= File.read('Gemfile')
+end
+
+def gem(*args)
+  options = args.extract_options!
+  name, *versions = args
+
+  if gemfile.match?(/gem ['"]#{name}/)
+    log :template, "#{name} is already installed"
+    return
+  end
+
+  super
+end
+
 gem 'devise'
 gem 'inline_svg'
 gem 'pagy'
@@ -30,6 +46,14 @@ gem_group :test do
   gem 'simplecov', '~> 0.17.1', require: false
   gem 'webdrivers'
 end
+
+# Remove comments frm Gemfile
+gemfile_contents = File.read('Gemfile')
+File.open('Gemfile', 'w') do |f|
+  f.puts gemfile_contents.split("\n").select { |l| l.strip[0] != '#' }
+end
+
+# TODO: Remove empty group blocks from Gemfile. Useful for app:template re-runs.
 
 application "config.log_level = ENV.fetch('RAILS_LOG_LEVEL', 'debug').to_sym"
 environment("config.hosts << ENV.fetch('LOCAL_TUNNEL_HOST', '')", env: 'development')
@@ -141,37 +165,39 @@ file '.env.dist', <<~TXT
   SMTP_SERVER=
 TXT
 
+run 'bundle install'
+run 'spring stop'
+run 'bundle exec rails generate rspec:install'
+run 'bundle exec rails generate simple_form:install'
+run 'bundle exec rails generate devise:install'
+run 'bundle exec rails generate pundit:install'
+run 'cp $(i18n-tasks gem-path)/templates/config/i18n-tasks.yml config/'
+run 'bundle exec rails db:create db:migrate'
+
+prepend_to_file 'spec/rails_helper.rb' do <<~RUBY
+  require 'simplecov'
+  SimpleCov.start 'rails' do
+    add_group 'Forms', 'app/forms'
+    add_group 'Presenters', 'app/presenters'
+    add_group 'Queries', 'app/queries'
+  end\n
+RUBY
+end
+append_to_file 'spec/rails_helper.rb' do <<~RUBY
+  \nShoulda::Matchers.configure do |config|
+    config.integrate do |with|
+      with.test_framework :rspec
+      with.library :rails
+    end
+  end
+
+  Capybara.configure do |config|
+    config.javascript_driver = :selenium_chrome_headless
+  end
+RUBY
+end
+
 after_bundle do
-  run 'spring stop'
-  run 'bundle exec rails generate rspec:install'
-  run 'bundle exec rails generate simple_form:install'
-  run 'bundle exec rails generate devise:install'
-  run 'bundle exec rails generate pundit:install'
-  run 'bundle exec rails db:create db:migrate'
-
-  prepend_to_file 'spec/rails_helper.rb' do <<~RUBY
-    require 'simplecov'
-    SimpleCov.start 'rails' do
-      add_group 'Forms', 'app/forms'
-      add_group 'Presenters', 'app/presenters'
-      add_group 'Queries', 'app/queries'
-    end\n
-  RUBY
-  end
-  append_to_file 'spec/rails_helper.rb' do <<~RUBY
-    \nShoulda::Matchers.configure do |config|
-      config.integrate do |with|
-        with.test_framework :rspec
-        with.library :rails
-      end
-    end
-
-    Capybara.configure do |config|
-      config.javascript_driver = :selenium_chrome_headless
-    end
-  RUBY
-  end
-
   git :init
   git add: "."
   git commit: %Q{ -m 'Initial commit' }
