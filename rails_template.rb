@@ -3,8 +3,8 @@ def gemfile
 end
 
 def gem(*args)
-  options = args.extract_options!
-  name, *versions = args
+  args.extract_options!
+  name, *_ = args
 
   if gemfile.match?(/gem ['"]#{name}/)
     log :template, "#{name} is already installed"
@@ -178,6 +178,7 @@ TXT
 
 run 'bundle install'
 run 'spring stop'
+run 'bundle exec rails generate annotate:install' unless Dir['lib/tasks/auto_annotate_models.rake'].any?
 run 'bundle exec rails generate rspec:install' unless Dir['spec/rails_helper.rb'].any?
 run 'bundle exec rails generate simple_form:install' unless Dir['config/initializers/simple_form.rb'].any?
 run 'bundle exec rails generate devise:install' unless Dir['config/initializers/devise.rb'].any?
