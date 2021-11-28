@@ -23,8 +23,6 @@ gem 'simple_form'
 
 gem_group :development do
   gem 'annotate'
-  gem 'rubocop'
-  gem 'rubocop-rails'
 end
 
 gem_group :development, :test do
@@ -34,6 +32,7 @@ gem_group :development, :test do
   gem 'i18n-tasks'
   gem 'letter_opener'
   gem 'rspec-rails'
+  gem 'standard'
   gem 'webmock'
 end
 
@@ -131,12 +130,10 @@ file '.github/workflows/ci.yml', <<~YAML
         run: |
           bin/rails db:setup
           bin/rails assets:precompile assets:clean
-      - name: Rubocop
-        run: bundle exec rubocop
-
+      - name: Linter
+        run: bundle exec standardrb --format progress
       - name: I18n Health
         run: bundle exec i18n-tasks health
-
       - name: Tests
         run: bundle exec rspec
 YAML
