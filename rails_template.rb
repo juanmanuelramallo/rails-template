@@ -1,5 +1,5 @@
 def gemfile
-  @gemfile ||= File.read('Gemfile')
+  @gemfile ||= File.read("Gemfile")
 end
 
 def gem(*args)
@@ -14,73 +14,73 @@ def gem(*args)
   super
 end
 
-gem 'devise'
-gem 'inline_svg'
-gem 'pagy'
-gem 'pundit'
-gem 'sidekiq'
-gem 'simple_form'
+gem "devise"
+gem "inline_svg"
+gem "pagy"
+gem "pundit"
+gem "sidekiq"
+gem "simple_form"
 
 gem_group :development do
-  gem 'annotate'
+  gem "annotate"
 end
 
 gem_group :development, :test do
-  gem 'dotenv-rails'
-  gem 'factory_bot_rails'
-  gem 'faker'
-  gem 'i18n-tasks'
-  gem 'letter_opener'
-  gem 'rspec-rails'
-  gem 'standard'
-  gem 'webmock'
+  gem "dotenv-rails"
+  gem "factory_bot_rails"
+  gem "faker"
+  gem "i18n-tasks"
+  gem "letter_opener"
+  gem "rspec-rails"
+  gem "standard"
+  gem "webmock"
 end
 
 gem_group :test do
-  gem 'capybara'
-  gem 'capybara-screenshot'
-  gem 'rspec-log_matcher'
-  gem 'rspec-retry'
-  gem 'shoulda-matchers'
-  gem 'simplecov', '~> 0.17.1', require: false
-  gem 'webdrivers'
+  gem "capybara"
+  gem "capybara-screenshot"
+  gem "rspec-log_matcher"
+  gem "rspec-retry"
+  gem "shoulda-matchers"
+  gem "simplecov", "~> 0.17.1", require: false
+  gem "webdrivers"
 end
 
 # Remove comments and empty groups from Gemfile
-gemfile_contents = File.read('Gemfile')
-File.open('Gemfile', 'w') do |f|
-  contents = gemfile_contents.split("\n").select { |l| l.strip[0] != '#' }.join("\n")
-  contents.gsub!(/\ngroup (.*) do\nend/, '')
+gemfile_contents = File.read("Gemfile")
+File.open("Gemfile", "w") do |f|
+  contents = gemfile_contents.split("\n").select { |l| l.strip[0] != "#" }.join("\n")
+  contents.gsub!(/\ngroup (.*) do\nend/, "")
   f.puts contents.strip
 end
 
-application "config.log_level = ENV.fetch('RAILS_LOG_LEVEL', 'debug').to_sym"
-environment("config.hosts << ENV.fetch('LOCAL_TUNNEL_HOST', '')", env: 'development')
-environment("config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }", env: 'development')
-environment(<<~RUBY, env: 'production')
-  config.action_mailer.default_url_options = { host: ENV.fetch('HOST_NAME') }
+application "config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "debug").to_sym"
+environment("config.hosts << ENV.fetch("LOCAL_TUNNEL_HOST", "")", env: "development")
+environment("config.action_mailer.default_url_options = { host: "localhost", port: 3000 }", env: "development")
+environment(<<~RUBY, env: "production")
+  config.action_mailer.default_url_options = { host: ENV.fetch("HOST_NAME") }
   config.action_mailer.smtp_settings = {
-    address: ENV.fetch('SMTP_SERVER'),
-    authentication: ENV.fetch('SMTP_AUTHENTICATION'),
-    domain: ENV.fetch('HOST_NAME'),
-    enable_starttls_auto: ENV.fetch('SMTP_ENABLE_STARTTLS_AUTO') == 'true',
-    password: ENV.fetch('SMTP_PASSWORD'),
-    port: ENV.fetch('SMTP_PORT'),
-    user_name: ENV.fetch('SMTP_LOGIN')
+    address: ENV.fetch("SMTP_SERVER"),
+    authentication: ENV.fetch("SMTP_AUTHENTICATION"),
+    domain: ENV.fetch("HOST_NAME"),
+    enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO") == "true",
+    password: ENV.fetch("SMTP_PASSWORD"),
+    port: ENV.fetch("SMTP_PORT"),
+    user_name: ENV.fetch("SMTP_LOGIN")
   }
   config.action_mailer.delivery_method = :smtp
 RUBY
 
-file '.github/workflows/ci.yml', <<~YAML
+file ".github/workflows/ci.yml", <<~YAML
   name: CI
 
   on:
     pull_request:
       branches:
-        - 'master'
+        - "master"
     push:
       branches:
-        - 'master'
+        - "master"
 
   jobs:
     build:
@@ -138,7 +138,7 @@ file '.github/workflows/ci.yml', <<~YAML
         run: bundle exec rspec
 YAML
 
-file '.env.dist', <<~TXT
+file ".env.dist", <<~TXT
   AWS_ACCESS_KEY_ID=
   AWS_BUCKET=
   AWS_REGION=
@@ -154,38 +154,39 @@ file '.env.dist', <<~TXT
   SMTP_SERVER=
 TXT
 
-file 'Procfile', <<~TXT
+file "Procfile", <<~TXT
   release: bundle exec rails db:migrate
   web: bundle exec puma -C config/puma.rb
   workers: bundle exec sidekiq
 TXT
 
-file 'Procfile.dev', <<~TXT
+file "Procfile.dev", <<~TXT
   web: bundle exec rails server
   webpack: ./bin/webpack-dev-server
 TXT
 
-run 'bundle install'
-run 'spring stop'
-run 'bundle exec rails generate annotate:install' unless Dir['lib/tasks/auto_annotate_models.rake'].any?
-run 'bundle exec rails generate rspec:install' unless Dir['spec/rails_helper.rb'].any?
-run 'bundle exec rails generate simple_form:install' unless Dir['config/initializers/simple_form.rb'].any?
-run 'bundle exec rails generate devise:install' unless Dir['config/initializers/devise.rb'].any?
-run 'bundle exec rails generate pundit:install' unless Dir['app/policies/application_policy.rb'].any?
-run 'cp $(i18n-tasks gem-path)/templates/config/i18n-tasks.yml config/' unless Dir['config/i18n-tasks.yml'].any?
-run 'bundle exec rails db:create' # TODO: Check if database already exists
-run 'bundle exec rails db:migrate'
+run "bundle install"
+run "spring stop"
+run "bundle exec rails generate annotate:install" unless Dir["lib/tasks/auto_annotate_models.rake"].any?
+run "bundle exec rails generate rspec:install" unless Dir["spec/rails_helper.rb"].any?
+run "bundle exec rails generate simple_form:install" unless Dir["config/initializers/simple_form.rb"].any?
+run "bundle exec rails generate devise:install" unless Dir["config/initializers/devise.rb"].any?
+run "bundle exec rails generate pundit:install" unless Dir["app/policies/application_policy.rb"].any?
+run "cp $(i18n-tasks gem-path)/templates/config/i18n-tasks.yml config/" unless Dir["config/i18n-tasks.yml"].any?
+run "bundle exec rails db:create" # TODO: Check if database already exists
+run "bundle exec rails db:migrate"
 
-prepend_to_file 'spec/rails_helper.rb' do <<~RUBY
-  require 'simplecov'
-  SimpleCov.start 'rails' do
-    add_group 'Forms', 'app/forms'
-    add_group 'Presenters', 'app/presenters'
-    add_group 'Queries', 'app/queries'
+prepend_to_file "spec/rails_helper.rb" do <<~RUBY
+  require "simplecov"
+  SimpleCov.start "rails" do
+    add_group "Forms", "app/forms"
+    add_group "Presenters", "app/presenters"
+    add_group "Queries", "app/queries"
+    add_group "Services", "app/services"
   end\n
 RUBY
 end
-append_to_file 'spec/rails_helper.rb' do <<~RUBY
+append_to_file "spec/rails_helper.rb" do <<~RUBY
   \nShoulda::Matchers.configure do |config|
     config.integrate do |with|
       with.test_framework :rspec
@@ -202,5 +203,5 @@ end
 after_bundle do
   git :init
   git add: "."
-  git commit: %Q{ -m 'Initial commit' }
+  git commit: %Q{ -m "Initial commit" }
 end
