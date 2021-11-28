@@ -109,23 +109,18 @@ file '.github/workflows/ci.yml', <<~YAML
       steps:
       - uses: actions/checkout@v2
       - name: Setup Ruby
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.0.x
+          bundler-cache: true
 
       - name: Install PostgreSQL 11 client
         run: |
           sudo apt-get -yqq install libpq-dev
-      - uses: actions/cache@v2
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
-      - uses: actions/cache@v2
+      - name: Restore yarn cache
+        uses: actions/cache@v2
         id: yarn-cache
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -134,11 +129,8 @@ file '.github/workflows/ci.yml', <<~YAML
             ${{ runner.os }}-yarn-
       - name: Build App
         run: |
-          bundle config path vendor/bundle
-          gem install bundler
-          bundle install --jobs 4 --retry 3
           bin/rails db:setup
-          bin/rails assets:precompile
+          bin/rails assets:precompile assets:clean
       - name: Rubocop
         run: bundle exec rubocop
 
