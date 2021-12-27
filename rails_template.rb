@@ -54,19 +54,19 @@ File.open("Gemfile", "w") do |f|
   f.puts contents.strip
 end
 
-application "config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "debug").to_sym"
-environment("config.hosts << ENV.fetch("LOCAL_TUNNEL_HOST", "")", env: "development")
-environment("config.action_mailer.default_url_options = { host: "localhost", port: 3000 }", env: "development")
+application "config.log_level = ENV.fetch(\"RAILS_LOG_LEVEL\", \"debug\").to_sym"
+environment("config.hosts << ENV.fetch(\"LOCAL_TUNNEL_HOST\", \"\")", env: "development")
+environment("config.action_mailer.default_url_options = { host: \"localhost\", port: 3000 }", env: "development")
 environment(<<~RUBY, env: "production")
-  config.action_mailer.default_url_options = { host: ENV.fetch("HOST_NAME") }
+  config.action_mailer.default_url_options = { host: ENV.fetch(\"HOST_NAME\") }
   config.action_mailer.smtp_settings = {
-    address: ENV.fetch("SMTP_SERVER"),
-    authentication: ENV.fetch("SMTP_AUTHENTICATION"),
-    domain: ENV.fetch("HOST_NAME"),
-    enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO") == "true",
-    password: ENV.fetch("SMTP_PASSWORD"),
-    port: ENV.fetch("SMTP_PORT"),
-    user_name: ENV.fetch("SMTP_LOGIN")
+    address: ENV.fetch(\"SMTP_SERVER\"),
+    authentication: ENV.fetch(\"SMTP_AUTHENTICATION\"),
+    domain: ENV.fetch(\"HOST_NAME\"),
+    enable_starttls_auto: ENV.fetch(\"SMTP_ENABLE_STARTTLS_AUTO\") == "true",
+    password: ENV.fetch(\"SMTP_PASSWORD\"),
+    port: ENV.fetch(\"SMTP_PORT\"),
+    user_name: ENV.fetch(\"SMTP_LOGIN\")
   }
   config.action_mailer.delivery_method = :smtp
 RUBY
@@ -129,6 +129,7 @@ file ".github/workflows/ci.yml", <<~YAML
       - name: Build App
         run: |
           bin/rails db:setup
+          yarn
           bin/rails assets:precompile assets:clean
       - name: Linter
         run: bundle exec standardrb --format progress
